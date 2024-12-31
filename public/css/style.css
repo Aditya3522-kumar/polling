@@ -1,0 +1,415 @@
+/* Add your custom styles here */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+.img-fluid:hover {
+    transform: scale(1.02);
+}
+
+@media (max-width: 768px) {
+    .img-fluid {
+        max-width: 80%;
+        margin: 2rem auto;
+        display: block;
+    }
+}
+
+/* Update chart container styles */
+.chart-container {
+    position: relative;
+    min-height: 150px;  /* Reduced from 200px */
+    max-height: 250px;  /* Reduced from 300px */
+    margin-top: 1rem;
+    width: 90%;        /* Added to make chart smaller */
+    margin-left: auto; /* Center the chart */
+    margin-right: auto;
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        min-height: 150px;  /* Reduced from 200px */
+        max-height: 200px;  /* Reduced from 250px */
+        margin: 2rem auto;
+    }
+}
+
+/* Modern Vote Bar Styles */
+.vote-bar-container {
+    background: #f8f9fa;
+    border-radius: 8px;
+    height: 32px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.vote-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: var(--percentage);
+    background: linear-gradient(135deg, #6c63ff 0%, #4a47d4 100%);
+    border-radius: 8px;
+    transition: width 1s ease-in-out;
+    animation: slideIn 1s ease-out;
+}
+
+.vote-percentage {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out 0.5s forwards;
+}
+
+/* For low percentages, move percentage outside the bar */
+.vote-bar[style*="--percentage:"] {
+    min-width: 2.5em;
+}
+
+.vote-bar[style*="--percentage: 0"] + .vote-percentage,
+.vote-bar[style*="--percentage: 1"] + .vote-percentage,
+.vote-bar[style*="--percentage: 2"] + .vote-percentage {
+    color: #6c757d;
+    right: auto;
+    left: 10px;
+}
+
+@keyframes slideIn {
+    from {
+        width: 0;
+    }
+    to {
+        width: var(--percentage);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Hover effect */
+.list-group-item:hover .vote-bar {
+    filter: brightness(1.05);
+    box-shadow: 0 0 15px rgba(108, 99, 255, 0.2);
+}
+
+/* Circular Progress Styles */
+.circular-progress {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: conic-gradient(
+        #6c63ff calc(var(--percentage) * 3.6deg),
+        #f0f0f0 0deg
+    );
+    position: relative;
+    animation: rotate 1s ease-out;
+}
+
+.circular-progress .inner {
+    position: absolute;
+    width: 80%;
+    height: 80%;
+    background: white;
+    border-radius: 50%;
+    top: 10%;
+    left: 10%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.percentage {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6c63ff;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(-90deg);
+    }
+    to {
+        transform: rotate(0deg);
+    }
+}
+
+.list-group-item:hover .circular-progress {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+/* Modern Result Styles */
+.result-card {
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.result-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.result-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.result-info {
+    flex: 1;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.option-text {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.vote-count {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+}
+
+.count-number {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.result-bar-wrapper {
+    height: 8px;
+    background: #edf2f7;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.result-bar {
+    height: 100%;
+    width: var(--percentage);
+    background: linear-gradient(
+        135deg,
+        hsl(var(--hue), 70%, 60%),
+        hsl(var(--hue), 70%, 45%)
+    );
+    border-radius: 4px;
+    position: relative;
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: shimmer 2s infinite linear;
+}
+
+.result-percentage {
+    position: absolute;
+    right: 0.5rem;
+    top: -1.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: hsl(var(--hue), 70%, 45%);
+    opacity: 0;
+    animation: fadeIn 0.3s ease-out 1s forwards;
+}
+
+.mini-chart {
+    width: 50px;
+    height: 50px;
+}
+
+.circular-chart {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.circular-chart path:last-of-type {
+    stroke-linecap: round;
+    transition: stroke-dasharray 1s ease-in-out;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% center;
+    }
+    100% {
+        background-position: 200% center;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Add subtle animation on hover */
+.result-card:hover .result-bar {
+    filter: brightness(1.1);
+}
+
+.result-card:hover .circular-chart path:last-of-type {
+    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.2));
+}
+
+/* Add these styles */
+.voters-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.voter-item {
+    transition: background-color 0.2s ease;
+}
+
+.voter-item:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+
+/* Add a badge to show total voters */
+.voters-badge {
+    font-size: 0.7em;
+    vertical-align: top;
+    margin-left: 2px;
+}
+
+/* Result Declaration Styles */
+.result-declaration {
+    background: linear-gradient(to right, #fff9c4, #ffffff);
+    border-left: 4px solid #ffd700;
+}
+
+.result-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #2c3e50;
+    white-space: pre-line;
+}
+
+.result-declaration .card-title {
+    color: #b7950b;
+}
+
+.result-declaration .bi-trophy {
+    font-size: 1.2em;
+}
+
+/* Poll Card Result Styles */
+.result-summary {
+    background: linear-gradient(to right, rgba(255, 249, 196, 0.3), rgba(255, 255, 255, 0));
+    border-left: 3px solid #ffd700;
+    padding: 0.75rem;
+    border-radius: 4px;
+}
+
+.result-summary .bi-trophy-fill {
+    font-size: 1.1em;
+}
+
+.card:hover .result-summary {
+    background: linear-gradient(to right, rgba(255, 249, 196, 0.5), rgba(255, 255, 255, 0));
+    transition: background 0.3s ease;
+}
+
+/* Result Pending Styles */
+.result-pending {
+    background: linear-gradient(to right, rgba(236, 239, 241, 0.3), rgba(255, 255, 255, 0));
+    border-left: 3px solid #90a4ae;
+    padding: 0.75rem;
+    border-radius: 4px;
+}
+
+.result-pending .bi-hourglass-split {
+    animation: flip 2s infinite linear;
+}
+
+@keyframes flip {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.card:hover .result-pending {
+    background: linear-gradient(to right, rgba(236, 239, 241, 0.5), rgba(255, 255, 255, 0));
+    transition: background 0.3s ease;
+}
+
+/* Voting Open Styles */
+.voting-open {
+    background: linear-gradient(to right, rgba(232, 245, 233, 0.3), rgba(255, 255, 255, 0));
+    border-left: 3px solid #4caf50;
+    padding: 0.75rem;
+    border-radius: 4px;
+}
+
+.voting-open .bi-check-circle-fill {
+    font-size: 1.1em;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+}
+
+.card:hover .voting-open {
+    background: linear-gradient(to right, rgba(232, 245, 233, 0.5), rgba(255, 255, 255, 0));
+    transition: background 0.3s ease;
+} 

@@ -1,0 +1,93 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h1 class="card-title text-center mb-4">Create New Poll</h1>
+                    <form action="/polls" method="POST" id="newPollForm">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Poll Title</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Options</label>
+                            <div id="optionsContainer">
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control" name="options[]" required>
+                                    <button type="button" class="btn btn-outline-danger remove-option">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control" name="options[]" required>
+                                    <button type="button" class="btn btn-outline-danger remove-option">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="addOption">
+                                <i class="bi bi-plus-circle"></i> Add Option
+                            </button>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="startDate" class="form-label">Start Date</label>
+                                <input type="datetime-local" class="form-control" id="startDate" name="startDate" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="endDate" class="form-label">End Date</label>
+                                <input type="datetime-local" class="form-control" id="endDate" name="endDate" required>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Create Poll</button>
+                            <a href="/polls" class="btn btn-outline-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const optionsContainer = document.getElementById('optionsContainer');
+    const addOptionBtn = document.getElementById('addOption');
+
+    addOptionBtn.addEventListener('click', function() {
+        const newOption = document.createElement('div');
+        newOption.className = 'input-group mb-2';
+        newOption.innerHTML = `
+            <input type="text" class="form-control" name="options[]" required>
+            <button type="button" class="btn btn-outline-danger remove-option">
+                <i class="bi bi-trash"></i>
+            </button>
+        `;
+        optionsContainer.appendChild(newOption);
+    });
+
+    optionsContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-option') || 
+            e.target.parentElement.classList.contains('remove-option')) {
+            const optionsCount = optionsContainer.children.length;
+            if (optionsCount > 2) {
+                const option = e.target.closest('.input-group');
+                option.remove();
+            } else {
+                alert('A poll must have at least 2 options');
+            }
+        }
+    });
+});
+</script> 

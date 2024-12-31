@@ -1,0 +1,107 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>All Polls</h1>
+        </div>
+        <% if(currentUser) { %>
+            <div class="col-md-4 text-md-end">
+                <a href="/polls/new" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Create New Poll
+                </a>
+            </div>
+        <% } %>
+    </div>
+
+    <% if(isAnonymous) { %>
+        <div class="alert alert-info mb-4">
+            <i class="bi bi-info-circle"></i> 
+            You are browsing as a guest. 
+            <a href="/login" class="alert-link">Login</a> to vote!
+        </div>
+    <% } %>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <% polls.forEach(poll => { %>
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header bg-transparent">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0"><%= poll.title %></h5>
+                            <% if(poll.isVotingOpen()) { %>
+                                <span class="badge bg-success">Active</span>
+                            <% } else { %>
+                                <span class="badge bg-secondary">Closed</span>
+                            <% } %>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text text-muted">
+                            <%= poll.description.substring(0, 100) %>...
+                        </p>
+                        
+                        <!-- Result Status Section -->
+                        <% if (poll.isVotingOpen()) { %>
+                            <div class="voting-open mb-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                    <span class="text-success">Open for Vote</span>
+                                </div>
+                            </div>
+                        <% } else { %>
+                            <% if (poll.isResultDeclared) { %>
+                                <div class="result-summary mb-3">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="bi bi-trophy-fill text-warning"></i>
+                                        <span class="fw-medium">Results Declared</span>
+                                    </div>
+                                    <p class="text-muted small mb-0">
+                                        <%= poll.resultDeclarationText.substring(0, 150) %>
+                                        <% if (poll.resultDeclarationText.length > 150) { %>...
+                                            <a href="/polls/<%= poll._id %>" class="text-primary">Read more</a>
+                                        <% } %>
+                                    </p>
+                                </div>
+                            <% } else { %>
+                                <div class="result-pending mb-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-hourglass-split text-muted"></i>
+                                        <span class="text-muted">Results Pending</span>
+                                    </div>
+                                </div>
+                            <% } %>
+                        <% } %>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <small class="text-muted">
+                                By: <%= poll.creator.username %>
+                            </small>
+                            <small class="text-muted">
+                                Votes: <%= poll.totalVotes %>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">
+                                Ends: <%= new Date(poll.endDate).toLocaleDateString() %>
+                            </small>
+                            <a href="/polls/<%= poll._id %>" class="btn btn-outline-primary btn-sm">
+                                <% if(isAnonymous) { %>
+                                    View Results
+                                <% } else { %>
+                                    <% if(poll.isVotingOpen()) { %>
+                                        Vote Now
+                                    <% } else { %>
+                                        View Results
+                                    <% } %>
+                                <% } %>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</div> 

@@ -1,0 +1,296 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow">
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Poll Info Section -->
+                        <div class="col-md-<%= currentUser ? '7' : '12' %>">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h1 class="card-title h2 mb-0"><%= poll.title %></h1>
+                                <div class="d-flex align-items-center gap-2">
+                                    <% if(poll.isVotingOpen()) { %>
+                                        <span class="badge bg-success">Active</span>
+                                    <% } else { %>
+                                        <span class="badge bg-secondary">Closed</span>
+                                    <% } %>
+                                    
+                                    <!-- Share Button -->
+                                    <button class="btn btn-outline-primary btn-sm" 
+                                            onclick="sharePoll()"
+                                            data-bs-toggle="tooltip" 
+                                            data-bs-title="Copy link to clipboard">
+                                        <i class="bi bi-share"></i>
+                                    </button>
+
+                                    <!-- Delete Button - Only show for creator -->
+                                    <% if(currentUser && poll.creator._id.equals(currentUser._id)) { %>
+                                        <form action="/polls/<%= poll._id %>?_method=DELETE" 
+                                              method="POST" 
+                                              class="d-inline"
+                                              onsubmit="return confirm('Are you sure you want to delete this poll?');">
+                                            <button class="btn btn-danger btn-sm">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    <% } %>
+
+                                    <!-- Add this next to the share button -->
+                                    <button class="btn btn-outline-info btn-sm position-relative" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#votersModal">
+                                        <i class="bi bi-people"></i>
+                                        <% if (votes && votes.length > 0) { %>
+                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info">
+                                                <%= votes.length %>
+                                            </span>
+                                        <% } %>
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-muted mb-4"><%= poll.description %></p>
+
+                            <div class="mb-4">
+                                <small class="text-muted">
+                                    Created by: <%= poll.creator.username %><br>
+                                    Start Date: <%= new Date(poll.startDate).toLocaleString() %><br>
+                                    End Date: <%= new Date(poll.endDate).toLocaleString() %>
+                                </small>
+                            </div>
+
+                            <% if (poll.isVotingOpen() && currentUser && !hasVoted) { %>
+                                <form action="/polls/<%= poll._id %>/vote" method="POST">
+                                    <input type="hidden" name="pollId" value="<%= poll._id %>">
+                                    <div class="list-group mb-4">
+                                        <% poll.options.forEach(option => { %>
+                                            <label class="list-group-item">
+                                                <input class="form-check-input me-2" type="radio" 
+                                                       name="optionId" value="<%= option._id %>" required>
+                                                <%= option.optionText %>
+                                            </label>
+                                        <% }) %>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary">Submit Vote</button>
+                                    </div>
+                                </form>
+                            <% } else { %>
+                                <div class="list-group mb-4">
+                                    <% poll.options.forEach(option => { %>
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div><%= option.optionText %></div>
+                                                <div>
+                                                    <span class="badge bg-primary rounded-pill">
+                                                        <%= option.voteCount %> votes
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="progress mt-2" style="height: 20px;">
+                                                <div class="progress-bar" role="progressbar" 
+                                                     style="width: <%= (option.voteCount / poll.totalVotes * 100) || 0 %>%">
+                                                    <%= Math.round((option.voteCount / poll.totalVotes * 100) || 0) %>%
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <% }) %>
+                                </div>
+
+                                <% if (!poll.isVotingOpen()) { %>
+                                    <div class="alert alert-info">
+                                        This poll is closed
+                                    </div>
+                                <% } else if (!currentUser) { %>
+                                    <div class="alert alert-warning">
+                                        Please <a href="/login?returnTo=<%= encodeURIComponent('/polls/' + poll._id) %>">login</a> to vote
+                                    </div>
+                                <% } else { %>
+                                    <div class="alert alert-success">
+                                        You have already voted in this poll
+                                    </div>
+                                <% } %>
+                            <% } %>
+                        </div>
+
+                        <!-- Chart Section - Only show for authenticated users -->
+                        <% if (currentUser && (!poll.isVotingOpen() || hasVoted)) { %>
+                            <div class="col-md-5">
+                                <div class="chart-container sticky-top" style="top: 2rem;">
+                                    <canvas id="resultsChart"></canvas>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Voters Modal -->
+<div class="modal fade" id="votersModal" tabindex="-1" aria-labelledby="votersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="votersModalLabel">Poll Voters</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <% if (votes && votes.length > 0) { %>
+                    <div class="list-group">
+                        <% votes.forEach(vote => { %>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-person-circle me-2"></i>
+                                    <%= vote.user.username %>
+                                </div>
+                                <small class="text-muted">
+                                    <%= new Date(vote.createdAt).toLocaleDateString() %>
+                                </small>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <p class="text-center text-muted">No votes yet</p>
+                <% } %>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% if (currentUser && (!poll.isVotingOpen() || hasVoted)) { %>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('resultsChart').getContext('2d');
+    
+    const data = {
+        labels: <%- JSON.stringify(poll.options.map(opt => opt.optionText)) %>,
+        datasets: [{
+            data: <%- JSON.stringify(poll.options.map(opt => opt.voteCount)) %>,
+            backgroundColor: [
+                '#6c63ff',
+                '#4CAF50',
+                '#FFC107',
+                '#FF5722',
+                '#9C27B0',
+                '#3F51B5',
+                '#E91E63',
+                '#00BCD4'
+            ]
+        }]
+    };
+
+    const config = {
+        type: 'doughnut',
+        data: data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 10,
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: 'Poll Results',
+                    font: {
+                        size: 14
+                    },
+                    padding: {
+                        bottom: 10
+                    }
+                }
+            },
+            layout: {
+                padding: 10
+            }
+        }
+    };
+
+    new Chart(ctx, config);
+});
+
+function sharePoll() {
+    const pollUrl = window.location.href;
+    navigator.clipboard.writeText(pollUrl).then(() => {
+        // Update tooltip to show success
+        const shareBtn = document.querySelector('[data-bs-toggle="tooltip"]');
+        const tooltip = bootstrap.Tooltip.getInstance(shareBtn);
+        
+        shareBtn.setAttribute('data-bs-title', 'Link copied!');
+        tooltip.dispose();
+        new bootstrap.Tooltip(shareBtn).show();
+
+        // Reset tooltip after 2 seconds
+        setTimeout(() => {
+            shareBtn.setAttribute('data-bs-title', 'Copy link to clipboard');
+            tooltip.dispose();
+            new bootstrap.Tooltip(shareBtn);
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy text: ', err);
+    });
+}
+
+// Initialize tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+<% } %> 
+
+<!-- Add this after the voting/results section -->
+<% if (!poll.isVotingOpen() && currentUser && poll.creator._id.equals(currentUser._id) && !poll.isResultDeclared) { %>
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Declare Results</h5>
+            <form action="/polls/<%= poll._id %>/declare-result" method="POST">
+                <div class="mb-3">
+                    <label for="resultText" class="form-label">Result Declaration</label>
+                    <textarea class="form-control" id="resultText" name="resultText" 
+                              rows="3" required 
+                              placeholder="Write your result declaration here..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    Declare Results
+                </button>
+            </form>
+        </div>
+    </div>
+<% } %>
+
+<!-- Add this to show declared results -->
+<% if (poll.isResultDeclared) { %>
+    <div class="card mt-4 result-declaration">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-trophy text-warning me-2"></i>
+                    Results Declared
+                </h5>
+                <small class="text-muted">
+                    <%= new Date(poll.resultDeclaredAt).toLocaleString() %>
+                </small>
+            </div>
+            <div class="result-text">
+                <%= poll.resultDeclarationText %>
+            </div>
+        </div>
+    </div>
+<% } %> 

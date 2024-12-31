@@ -1,0 +1,107 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container mt-4">
+    <!-- Hero Section -->
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h1 class="display-4 mb-3">Welcome to VotePoll</h1>
+            <p class="lead text-muted">Create and participate in polls. Make your voice heard!</p>
+            <div class="d-grid gap-2 d-md-flex">
+                <% if(!currentUser) { %>
+                    <a href="/login" class="btn btn-primary btn-lg me-md-2">Login</a>
+                    <a href="/polls" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-list"></i> View All Polls
+                    </a>
+                <% } else { %>
+                    <a href="/polls/new" class="btn btn-primary btn-lg me-md-2">
+                        <i class="bi bi-plus-circle"></i> Create New Poll
+                    </a>
+                    <a href="/polls" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-list"></i> View All Polls
+                    </a>
+                <% } %>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <img src="/images/voting.svg" alt="Voting Illustration" class="img-fluid">
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-4">
+            <h2>Features</h2>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-check display-4 text-primary mb-3"></i>
+                    <h5 class="card-title">Create Polls</h5>
+                    <p class="card-text">Create custom polls with multiple options and set voting duration.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-bar-chart display-4 text-primary mb-3"></i>
+                    <h5 class="card-title">Real-time Results</h5>
+                    <p class="card-text">Watch results update in real-time with interactive charts.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-shield-check display-4 text-primary mb-3"></i>
+                    <h5 class="card-title">Secure Voting</h5>
+                    <p class="card-text">One vote per user, with secure authentication.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Polls Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="mb-4">Recent Polls</h2>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                <% if (locals.recentPolls && recentPolls.length) { %>
+                    <% recentPolls.forEach(poll => { %>
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body">
+                                    <h5 class="card-title"><%= poll.title %></h5>
+                                    <p class="card-text text-muted">
+                                        <%= poll.description.substring(0, 100) %>...
+                                    </p>
+                                    <p class="card-text">
+                                        <small class="text-muted">
+                                            Created by: <%= poll.creator.username %>
+                                        </small>
+                                    </p>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <div class="d-grid">
+                                        <a href="/polls/<%= poll._id %>" class="btn btn-outline-primary">
+                                            Vote Now
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            No polls available yet. 
+                            <% if(currentUser) { %>
+                                <a href="/polls/new">Create the first one!</a>
+                            <% } %>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div> 
