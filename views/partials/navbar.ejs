@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand" href="/">Voting App</a>
+        <a class="navbar-brand" href="/">VotePoll</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -10,7 +10,40 @@
                     <a class="nav-link" href="/">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/explore">Explore</a>
+                    <a class="nav-link" href="/polls">Polls</a>
+                </li>
+                <!-- Add Groups Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" 
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-people"></i> Groups
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" href="/groups">
+                                <i class="bi bi-grid"></i> All Groups
+                            </a>
+                        </li>
+                        <% if(currentUser) { %>
+                            <li>
+                                <a class="dropdown-item" href="/groups/my">
+                                    <i class="bi bi-person-lines-fill"></i> My Groups
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" 
+                                   data-bs-target="#createGroupModal">
+                                    <i class="bi bi-plus-circle"></i> Create Group
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/groups/search">
+                                    <i class="bi bi-search"></i> Find Group
+                                </a>
+                            </li>
+                        <% } %>
+                    </ul>
                 </li>
             </ul>
             <ul class="navbar-nav">
@@ -22,11 +55,57 @@
                         <a class="nav-link" href="/signup">Sign Up</a>
                     </li>
                 <% } else { %>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/logout">Logout</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" 
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> <%= currentUser.username %>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="/profile">
+                                    <i class="bi bi-person"></i> Profile
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="/logout">
+                                    <i class="bi bi-box-arrow-right"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 <% } %>
             </ul>
         </div>
     </div>
-</nav> 
+</nav>
+
+<!-- Create Group Modal -->
+<% if(currentUser) { %>
+<div class="modal fade" id="createGroupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Group</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/groups" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Group Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Create Group</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<% } %> 

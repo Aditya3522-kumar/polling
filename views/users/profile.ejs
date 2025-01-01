@@ -1,0 +1,229 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Profile Info Card -->
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-body text-center">
+                    <div class="position-relative mb-3">
+                        <img src="<%= profileUser.profilePicture %>" 
+                             class="rounded-circle" 
+                             style="width: 150px; height: 150px; object-fit: cover;"
+                             alt="Profile Picture">
+                        <button class="btn btn-sm btn-primary position-absolute bottom-0 end-0"
+                                data-bs-toggle="modal" 
+                                data-bs-target="#updatePictureModal">
+                            <i class="bi bi-camera"></i>
+                        </button>
+                    </div>
+                    <h3><%= profileUser.username %></h3>
+                    <p class="text-muted"><%= profileUser.email %></p>
+                    <button class="btn btn-outline-primary btn-sm"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#editProfileModal">
+                        <i class="bi bi-pencil"></i> Edit Profile
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bio Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">About Me</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0"><%= profileUser.bio || 'No bio added yet.' %></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Section -->
+        <div class="col-md-8">
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h3><%= profileUser.groups.length %></h3>
+                            <p class="mb-0">Groups</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h3><%= profileUser.createdPolls.length %></h3>
+                            <p class="mb-0">Polls Created</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h3><%= profileUser.votedPolls.length %></h3>
+                            <p class="mb-0">Votes Cast</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Groups Section -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">My Groups</h5>
+                </div>
+                <div class="card-body">
+                    <% if (profileUser.groups.length > 0) { %>
+                        <div class="list-group">
+                            <% profileUser.groups.forEach(group => { %>
+                                <a href="/groups/<%= group._id %>" 
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1"><%= group.name %></h6>
+                                            <small class="text-muted">ID: <%= group.groupId %></small>
+                                        </div>
+                                        <% if (profileUser.adminGroups.includes(group._id)) { %>
+                                            <span class="badge bg-primary">Admin</span>
+                                        <% } %>
+                                    </div>
+                                </a>
+                            <% }) %>
+                        </div>
+                    <% } else { %>
+                        <p class="text-center text-muted">
+                            You haven't joined any groups yet. 
+                            <a href="/groups">Find groups to join!</a>
+                        </p>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Poll Activity -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Poll Activity</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Public Polls -->
+                    <h6 class="mb-3">Public Polls</h6>
+                    <div class="list-group mb-4">
+                        <% publicPolls.forEach(poll => { %>
+                            <a href="/polls/<%= poll._id %>" class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1"><%= poll.title %></h6>
+                                        <small class="text-muted">Public Poll</small>
+                                    </div>
+                                    <small class="text-muted">
+                                        <%= new Date(poll.createdAt).toLocaleDateString() %>
+                                    </small>
+                                </div>
+                            </a>
+                        <% }) %>
+                    </div>
+
+                    <!-- Group Polls -->
+                    <h6 class="mb-3">Group Polls</h6>
+                    <div class="list-group">
+                        <% groupPolls.forEach(poll => { %>
+                            <a href="/polls/<%= poll._id %>" class="list-group-item list-group-item-action">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1"><%= poll.title %></h6>
+                                        <small class="text-muted">
+                                            Group: <%= poll.createdFor.name %> 
+                                            (<%= poll.createdFor.groupId %>)
+                                        </small>
+                                    </div>
+                                    <small class="text-muted">
+                                        <%= new Date(poll.createdAt).toLocaleDateString() %>
+                                    </small>
+                                </div>
+                            </a>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add a Stats Card for Poll Types -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h3><%= publicPolls.length %></h3>
+                            <p class="mb-0">Public Polls</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h3><%= groupPolls.length %></h3>
+                            <p class="mb-0">Group Polls</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h3><%= profileUser.votedPolls.length %></h3>
+                            <p class="mb-0">Votes Cast</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/profile" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">Bio</label>
+                        <textarea class="form-control" id="bio" name="bio" 
+                                  rows="4"><%= profileUser.bio %></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Update Picture Modal -->
+<div class="modal fade" id="updatePictureModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Profile Picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/profile/picture" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="profilePicture" class="form-label">Choose Picture</label>
+                        <input type="file" class="form-control" id="profilePicture" 
+                               name="profilePicture" accept="image/*" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div> 

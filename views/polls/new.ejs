@@ -18,6 +18,25 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="createdFor" class="form-label">Create Poll For</label>
+                            <select class="form-select" id="createdFor" name="createdFor">
+                                <option value="">Public Poll (visible to everyone)</option>
+                                <% if (userGroups && userGroups.length > 0) { %>
+                                    <optgroup label="Your Groups">
+                                        <% userGroups.forEach(group => { %>
+                                            <option value="<%= group._id %>">
+                                                <%= group.name %> (<%= group.groupId %>)
+                                            </option>
+                                        <% }) %>
+                                    </optgroup>
+                                <% } %>
+                            </select>
+                            <div class="form-text">
+                                Select a group to make this poll visible only to its members
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label">Options</label>
                             <div id="optionsContainer">
                                 <div class="input-group mb-2">

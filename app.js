@@ -1,3 +1,8 @@
+require('./models/User');
+require('./models/Poll');
+require('./models/Group');
+require('./models/Vote');
+
 process.removeAllListeners('warning');
 const express = require('express');
 const path = require('path');
@@ -11,6 +16,9 @@ const pollController = require('./controllers/pollController');
 const { isLoggedIn, isNotLoggedIn, allowAnonymous } = require('./middleware/auth');
 const { fetchCurrentUser } = require('./middleware/user');
 const methodOverride = require('method-override');
+const profileController = require('./controllers/profileController');
+const groupController = require('./controllers/groupController');
+const groupRoutes = require('./routes/groupRoutes');
 require('dotenv').config();
 
 const app = express();
@@ -18,10 +26,10 @@ const app = express();
 // Database connection
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => {
-        console.log("database connected");
+        console.log("Database connected");
     })
-    .catch((err) => {
-        console.log("Error connecting to database:", err);
+    .catch(err => {
+        console.log("MongoDB connection error:", err);
     });
 
 // EJS setup
@@ -93,6 +101,19 @@ app.get('/polls/:id', allowAnonymous, pollController.showPoll);
 app.post('/polls/:id/vote', isLoggedIn, pollController.submitVote);
 app.delete('/polls/:id', isLoggedIn, pollController.deletePoll);
 app.post('/polls/:id/declare-result', isLoggedIn, pollController.declareResult);
+
+// Profile routes
+app.get('/profile', isLoggedIn, profileController.showProfile);
+app.post('/profile', isLoggedIn, profileController.updateProfile);
+app.post('/profile/picture', isLoggedIn, profileController.updateProfilePicture);
+
+// Group routes
+app.get('/groups', isLoggedIn, groupController.index);
+app.get('/groups/my', isLoggedIn, groupController.myGroups);
+app.get('/groups/search', isLoggedIn, groupController.searchGroups);
+app.post('/groups', isLoggedIn, groupController.createGroup);
+app.get('/groups/:id', isLoggedIn, groupController.showGroup);
+app.use('/groups', groupRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
