@@ -8,7 +8,7 @@ const pollController = {
     // Show all polls
     index: catchAsync(async (req, res) => {
         let query = {};
-        
+
         if (req.session.user_id) {
             // If user is logged in, show public polls and polls from their groups
             const user = await User.findById(req.session.user_id);
@@ -47,16 +47,15 @@ const pollController = {
 
     // Create new poll
     createPoll: catchAsync(async (req, res) => {
-        const { title, description, options, startDate, endDate, createdFor } = req.body;
-        
+        const { title, description, options, createdFor } = req.body;
+
         // Create poll with group reference if selected
         const poll = new Poll({
             title,
             description,
             creator: req.session.user_id,
             createdFor: createdFor || null, // If no group selected, it's a public poll
-            startDate,
-            endDate,
+            // Removed startDate and endDate as per your update
             options: options.map(opt => ({ optionText: opt }))
         });
 
@@ -115,54 +114,49 @@ const pollController = {
     }),
 
     // Submit vote
-    submitVote: async (req, res) => {
-        try {
-            const { pollId, optionId } = req.body;
-            
-            // Check if poll is still open
-            const poll = await Poll.findById(pollId);
-            if (!poll.isVotingOpen()) {
-                req.flash('error', 'This poll is closed');
-                return res.redirect(`/polls/${pollId}`);
-            }
+    submitVote: catchAsync(async (req, res) => {
+        const { pollId, optionId } = req.body;
 
-            // Create vote
-            const vote = new Vote({
-                user: req.session.user_id,
-                poll: pollId,
-                option: optionId
-            });
-
-            await vote.save();
-
-            // Update poll option vote count and total votes
-            await Poll.findOneAndUpdate(
-                { _id: pollId, "options._id": optionId },
-                { 
-                    $inc: {
-                        "options.$.voteCount": 1,
-                        totalVotes: 1
-                    }
-                }
-            );
-
-            // Add poll to user's voted polls
-            await User.findByIdAndUpdate(req.session.user_id, {
-                $push: { votedPolls: pollId }
-            });
-
-            req.flash('success', 'Vote submitted successfully!');
-            res.redirect(`/polls/${pollId}`);
-        } catch (error) {
-            req.flash('error', 'Error submitting vote');
-            res.redirect(`/polls/${req.body.pollId}`);
+        // Check if poll is still open based on isActive
+        const poll = await Poll.findById(pollId);
+        if (!poll.isActive) {
+            req.flash('error', 'This poll is closed');
+            return res.redirect(`/polls/${pollId}`);
         }
-    },
+
+        // Create vote
+        const vote = new Vote({
+            user: req.session.user_id,
+            poll: pollId,
+            option: optionId
+        });
+
+        await vote.save();
+
+        // Update poll option vote count and total votes
+        await Poll.findOneAndUpdate(
+            { _id: pollId, "options._id": optionId },
+            { 
+                $inc: {
+                    "options.$.voteCount": 1,
+                    totalVotes: 1
+                }
+            }
+        );
+
+        // Add poll to user's voted polls
+        await User.findByIdAndUpdate(req.session.user_id, {
+            $push: { votedPolls: pollId }
+        });
+
+        req.flash('success', 'Vote submitted successfully!');
+        res.redirect(`/polls/${pollId}`);
+    }),
 
     deletePoll: catchAsync(async (req, res) => {
         const { id } = req.params;
         const poll = await Poll.findById(id);
-        
+
         if (!poll) {
             req.flash('error', 'Poll not found');
             return res.redirect('/polls');
@@ -197,7 +191,7 @@ const pollController = {
 
         // Finally delete the poll
         await Poll.findByIdAndDelete(id);
-        
+
         req.flash('success', 'Successfully deleted poll');
         res.redirect('/polls');
     }),
@@ -206,7 +200,7 @@ const pollController = {
         const { id } = req.params;
         const { resultText } = req.body;
         const poll = await Poll.findById(id);
-        
+
         if (!poll) {
             req.flash('error', 'Poll not found');
             return res.redirect('/polls');
@@ -218,8 +212,8 @@ const pollController = {
             return res.redirect(`/polls/${id}`);
         }
 
-        // Check if poll is closed
-        if (poll.isVotingOpen()) {
+        // Check if poll is closed based on isActive flag
+        if (poll.isActive) {
             req.flash('error', 'Cannot declare results while poll is still open');
             return res.redirect(`/polls/${id}`);
         }
@@ -236,4 +230,4 @@ const pollController = {
     })
 };
 
-module.exports = pollController; 
+module.exports = pollController;
