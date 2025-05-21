@@ -41,7 +41,7 @@
                     </div>
 
                     <p class="card-text"><%= group.description %></p>
-                    
+
                     <div class="mb-3">
                         <small class="text-muted">
                             Created by: <%= group.admin.username %><br>
@@ -171,11 +171,7 @@
                                             <h6 class="mb-1"><%= poll.title %></h6>
                                             <small class="text-muted">Created by: <%= poll.creator.username %></small>
                                         </div>
-                                        <% if(poll.isVotingOpen()) { %>
-                                            <span class="badge bg-success">Active</span>
-                                        <% } else { %>
-                                            <span class="badge bg-secondary">Closed</span>
-                                        <% } %>
+                                        <!-- Voting status removed -->
                                     </div>
                                 </a>
                             <% }) %>
@@ -187,4 +183,4 @@
             </div>
         </div>
     </div>
-</div> 
+</div>
