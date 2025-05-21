@@ -31,15 +31,6 @@ const pollSchema = new Schema({
         ref: 'Group',
         default: null
     },
-    startDate: {
-        type: Date,
-        required: true,
-        default: Date.now
-    },
-    endDate: {
-        type: Date,
-        required: true
-    },
     options: [optionSchema],
     isActive: {
         type: Boolean,
@@ -64,28 +55,16 @@ const pollSchema = new Schema({
     timestamps: true
 });
 
-// Add methods to check if poll is active
-pollSchema.methods.isVotingOpen = function() {
-    const now = new Date();
-    return now >= this.startDate && now <= this.endDate && this.isActive;
-};
+// Removed isVotingOpen function since time is no longer used
 
-// Add method to check if a user can view this poll
+// Keep user access check
 pollSchema.methods.canUserView = async function(userId) {
-    // If poll is not group-specific (public), anyone can view
-    if (!this.createdFor) {
-        return true;
-    }
+    if (!this.createdFor) return true;
+    if (!userId) return false;
 
-    // If user is not logged in and poll is group-specific
-    if (!userId) {
-        return false;
-    }
-
-    // Find the group and check if user is a member
     const Group = mongoose.model('Group');
     const group = await Group.findById(this.createdFor);
     return group && group.members.includes(userId);
 };
 
-module.exports = mongoose.model('Poll', pollSchema); 
+module.exports = mongoose.model('Poll', pollSchema);
